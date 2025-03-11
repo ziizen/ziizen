@@ -1,0 +1,237 @@
+/*滚动框宽度为0，即隐藏垂直滚动条*/
+::-webkit-scrollbar{
+	width: 0;
+	height: 100%;
+}
+/* 整体样式 */
+@font-face {
+	font-family: 'font_logo';
+	src: url('../fonts/HamburgHand-Bold.otf');
+}
+body {
+	margin: 0;
+	padding: 0;
+	overflow-x: hidden;
+}
+ul, li{
+	list-style: none;
+	padding: 0;
+}
+a {
+	text-decoration: none; /* 去掉下划线 */
+}
+
+/* 头部样式 */
+#header {
+	position: fixed;
+	top: 0;
+	width: 92vw;
+	height: 30px;
+	padding: 30px 4vw;
+	z-index: 100;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.header {
+	background: linear-gradient(120deg, #3498db, #8e44ad);
+}
+#header a {
+	color: #ffffff;
+}
+#header .chao {
+	font-family: 'font_logo';
+	font-size: 2.5rem;
+	line-height: 25px;
+}
+#header .menu{
+	display: flex;
+	justify-content: flex-end;
+}
+#header .menu li{
+	font-family: 'PingFang SC', 'Microsoft YaHei';
+	font-size: 20px;
+	margin-left: 30px;
+}
+#bg_img {
+	height: 100vh;
+	width: 100vw;
+	background-image: linear-gradient(120deg, #3498db, #8e44ad);
+}
+
+/* 主体样式 */
+#banner {
+	padding: 20px 4vw 40px 4vw;
+	margin: 90px 0 0 -1vw;
+	min-height: calc(100vh - 150px);
+	font-size: 0;
+}
+#banner p {
+	margin: 10px 1vw 20px 1vw;
+    width: calc(92vw-8px);
+	height: 2rem;
+	line-height: 2rem;
+	font-size: 1.2rem;
+	font-family: 'PingFang SC', 'Microsoft YaHei';
+	font-weight: bold;
+    color: #333;
+	text-indent: 8px;
+	border-left: #3498db solid 8px;
+	border-radius: 4px 0 0 4px;
+}
+#banner .web_box li {
+	display: inline-block;
+	width: 15.6vw;
+	height: auto;
+	background-color: #ffffff;
+	box-shadow: 0 2px 2px #8d44ad20;
+	overflow: hidden;
+	margin: 0 0 20px 1vw;
+	padding: 0 1vw 8px 1vw;
+	transition: all 0.2s;
+    position: relative;
+}
+#banner .web_box li:hover {
+	box-shadow: 0 17px 32px -28px #8d44ad80;
+	transform: translate(0, -4px);
+}
+#banner .web_box li a{
+	display: inline-block;
+	width: 100%;
+	height: 28px;
+	padding: 10px 0;
+	transition: all 0.2s;
+    color: #000000;
+}
+#banner .web_box li a:hover {
+	background-image: linear-gradient(120deg, #3498db, #8e44ad, #8e44ad);
+	background-clip: text;
+	-webkit-background-clip: text;
+	color: transparent;
+}
+#banner .web_box li a .web_icon {
+	display: block;
+	float: left;
+	width: 28px;
+	height: 28px;
+	position: relative;
+}
+#banner .web_box li a .web_icon img {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	max-width: 100%;
+	max-height: 100%;
+	vertical-align: middle;
+}
+#banner .web_box li a .web_title {
+	display: block;
+	float: left;
+    width: 0;
+	padding: 0 0.5vw;
+	line-height: 30px;
+	font-size: 1.2rem;
+	font-family: 'PingFang SC', 'Microsoft YaHei';
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+#banner .web_box li .web_desc {
+	line-height: 30px;
+	font-size: 0.8rem;
+	font-family: 'PingFang SC', 'Microsoft YaHei';
+	color: rgba(102, 102, 102, 0.55);
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+#banner .web_box li .system_icon{
+	position: absolute;
+	right: 0.5vw;
+	bottom: 10px;
+	width: auto;
+	height: 16px;
+	opacity: 0.05;
+	transition: all 0.5s;
+}
+#banner .web_box li:hover .system_icon{
+	opacity: 1;
+}
+#banner .web_box li .system_icon img{
+	height: 16px;
+	width: 16px;
+	margin-left: 0.5vw;
+}
+/*****团片展示界面开始*****
+#banner .logo_box li {
+	display: inline-block;
+	width: 17.6vw;
+	height: 80px;
+	margin: 0 0 0 1vw;
+	padding: 0px 0 90px;
+	overflow: hidden;
+}
+#banner .logo_box li img {
+	white-space: nowrap;
+	width: 100%;
+	transform: scale(1.6);
+	transition: all 0.5s;
+	transform-origin: center center;
+}
+#banner .logo_box li img:hover {
+	transform: scale(2.6);
+}
+*****图片展示界面结束*****/
+
+/* 尾部样式 */
+#footer {
+	height: 160px;
+	width: 100vw;
+	padding: 40px 0;
+	margin-top: 20px;
+	background-image: linear-gradient(120deg, #3498db, #8e44ad);
+}
+#footer .footer_left {
+	display: inline-block;
+	height: 160px;
+	line-height: 160px;
+	width: 114px;
+	padding: 0 4vw;
+	font-size: 0;
+	border-right: solid 1px #ffffff;
+}
+#footer .footer_left a img {
+	height: 20px;
+	width: 114px;
+	transform: translate(0, 0.2rem);
+}
+#footer .footer_right {
+	display: inline-block;
+	height: 160px;
+	line-height: 160px;
+	margin-left: 4vw;
+	color: #ffffff;
+	font-family: 'PingFang SC', 'Microsoft YaHei';
+	font-size: 1rem;
+	font-weight: 100;
+}
+#footer .footer_right .link_gitee{
+	display: inline-block;
+	height: 30px;
+	width: 30px;
+	background: url("https://pic1.zhimg.com/v2-77b1a31dc62d9e00abd0ea6cdaba5c83_xl.jpg") no-repeat;
+	background-size: 30px 30px;
+	margin-left: 4vw;
+	filter: grayscale(100%);
+	opacity: 0.5;
+	transform: translate(0, 0.5rem);
+}
+
+/*pad phone <1000px max-width: 999px*/
+@media screen and (max-width: 999px) {
+	#banner .web_box li {
+		width: 28vw;
+	}
+    #banner .logo_box li {
+		width: 30vw;
+    }
+}
