@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>画板</title>
+		<style type = "text/css">
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			body {
+				width: 100vw;
+				height: 100vh;
+				display: flex;
+				flex-direction: column;
+				justify-content: flex-start;
+			}
+			#menu {
+				width: 100vw;
+				height: 80px;
+				display: flex;
+				border-bottom: 1px solid #ccc;
+				justify-content: space-around;
+				align-items: center;
+			}
+			#canvas {
+				flex: 1;
+				width: 100vw;
+			}
+			.btn {
+				display: flex;
+				justify-content: space-around;
+				align-items: center;
+				width: 80px;
+				height: 40px;
+				border: 1px solid transparent;
+			}
+			.btn:hover {
+				border: 1px solid #0075ff60;
+				background-color: #0075ff10;
+			}
+			.btn.active {
+				border: 1px solid #0075ff;
+				background-color: #0075ff30;
+			}
+			.btnLine {
+				width: 80px;
+				height: 40px;
+				border: 1px solid transparent;
+				text-align: center;
+				line-height: 38px;
+			}
+			.btnLine:hover {
+				border: 1px solid #0075ff60;
+				background-color: #0075ff10;
+			}
+			.btnLine.active {
+				border: 1px solid #0075ff;
+				background-color: #0075ff30;
+			}
+			#pen:after {
+				content: "✐";
+				display: block;
+				font-size: 24px;
+				transform: rotate(180deg);
+			}
+			#eraser:after {
+				content: "";
+				display: block;
+				width: 7px;
+				height: 10px;
+				border-top: 2px solid #333;
+				border-right: 2px solid #333;
+				border-bottom: 7px solid #333;
+				border-left: 2px solid #333;
+				border-radius: 1px;
+				transform: rotate(45deg);
+			}
+			#cleararea:after {
+				content: "▨";
+				display: block;
+				font-size: 26px;
+			}
+			#line:after {
+				content: "";
+				display: block;
+				width: 2px;
+				height: 22px;
+				background-color: #333;
+				transform: rotate(45deg);
+			}
+			#rect:after {
+				content: "";
+				display: block;
+				width: 14px;
+				height: 14px;
+				border: 2px solid #333;
+			}
+			#arc:after {
+				content: "";
+				display: block;
+				width: 15px;
+				height: 15px;
+				border-radius: 15px;
+				border: 2px solid #333;
+			}
+			.arrow {
+				font-size: 24px;
+				font-family: "微软雅黑";
+			}
+			#undo:after {
+				content: "↶";
+				display: block;
+			}
+			#redo:after {
+				content: "↷";
+				display: block;
+			}
+			#strokeFill, #color {
+				width: 80px;
+				display: flex;
+				justify-content: space-around;
+				align-items: center;
+			}
+			#strokeFill select {
+				width: 80px;
+				height: 24px;
+			}
+			#range {
+				position: relative;
+			}
+			#thickness {
+				width: 80px;
+			}
+			#num {
+				position: absolute;
+				left: 8%;
+				top: -20px;
+				color: #0075ff;
+				opacity: 0;
+				transition: 0.2s;
+			}
+			#down:after {
+				content: "➔";
+				display: block;
+				transform: rotate(90deg);
+			}
+		</style>
+	</head>
+	<body>
+		<div id = "menu">
+			<div id = "pen" class = "btn active" onclick = "drawType(this)" title = "画笔"></div>
+			<div id = "eraser" class = "btn" onclick = "drawType(this)" title = "橡皮擦"></div>
+			<div id = "cleararea" class = "btn" onclick = "drawType(this)" title = "区域清除"></div>
+			<div id = "line" class = "btn" onclick = "drawType(this)" title = "直线"></div>
+			<div id = "rect" class = "btn" onclick = "drawType(this)" title = "矩形"></div>
+			<div id = "arc" class = "btn" onclick = "drawType(this)" title = "圆形"></div>
+			<div id = "undo" class = "btn arrow" title = "撤销"></div>
+			<div id = "redo" class = "btn arrow" title = "重做"></div>
+			<div id = "strokeFill">
+				<select onchange = "drawStroke(this)">
+					<option value = "stroke">描边</option>
+					<option value = "fill">填充</option>
+				</select>
+			</div>
+			<div id = "range"  title = "粗细">
+				<input id = "thickness" type = "range" value = "4" min = "1" max = "50" step = "1"></input>
+				<span id = "num">4</span>
+			</div>
+			<div id = "color" title = "颜色">
+				<input type = "color" value = "#000000" onchange = "drawColor(this)"></input>
+			</div>
+			<div id = "down" class = "btn arrow" title = "下载" onclick = "canvasDown(this)"></div>
+			<div style = "display:none;">
+				<a href = "" download = "画板">下载</a>
+			</div>
+		</div>
+		<canvas id = "canvas">canvas不支持</canvas>
+		<script type = "text/javascript">
+			var canvas = document.querySelector('#canvas');
+			var ctx = canvas.getContext('2d');
+			canvas.setAttribute('width',canvas.offsetWidth);
+			canvas.setAttribute('height',canvas.offsetHeight);
+
+			// 获取全局变量
+			var palette = {
+				type: 'pen', // 形状
+				strokeFill: 'stroke', // 是描边还是填充
+				lineWidth: '4', // 粗细
+				color: '#333333' // 颜色
+			};
+			
+			// 更新全局变量
+			var allBtn = document.querySelectorAll('.btn'); // 获取所有需要变更背景色的按钮
+			
+			drawType = function(ev){
+				// 清除按钮背景色
+				allBtn.forEach(function(item,i){
+					item.classList.remove('active');
+				});
+				// 为当前按钮添加背景色
+				ev.classList.add('active');
+				// 设置形状
+				palette.type = ev.id;
+			};
+
+			drawStroke = function(ev){
+				// 设置描边/填充
+				palette.strokeFill = ev.options[ev.selectedIndex].value;
+			};
+
+			var thickness = document.querySelector('#thickness');
+			var num = document.querySelector('#num');
+			thickness.oninput = function(){
+				// 设置粗细
+				palette.lineWidth = thickness.value;
+				// 显示悬浮数字
+				num.style.opacity = 100;
+				num.innerHTML = thickness.value;
+				num.style.left = (thickness.value * 1.75) + '%';
+			};
+			thickness.onmouseup = function(){
+				// 隐藏悬浮数字
+				num.style.opacity = 0;
+			};
+
+			drawColor = function(ev){
+				// 设置颜色
+				palette.color = ev.value;
+			};
+			
+			// 面向对象的思路
+			var undo = document.getElementById('undo');
+			var redo = document.getElementById('redo');
+			var mouse = document.getElementById('mouse');
+			function drawImg(){
+				this.moving = false; // 是否在拖动
+				this.x = 0; // 鼠标点击时的横坐标
+				this.y = 0; // 鼠标点击时的纵坐标
+				this.imgData = ''; // 绘制完保存canvas图片
+				this.canvasHistory = []; // 存放历史记录
+				this.step = -1; // 历史记录数
+
+				canvas.onmousedown = (ev)=>{
+					this.moving = true;
+					// 鼠标点击的初始位置
+					this.x = ev.offsetX;
+					this.y = ev.offsetY;
+					if(palette.type == 'pen'){
+						ctx.beginPath();
+						ctx.moveTo(this.x, this.y);
+					};
+				};
+
+				canvas.onmousemove = (ev)=>{
+					if(!this.moving){
+						return;
+					};
+					// 定义形状函数
+					this[palette.type](ev);
+				};
+
+				canvas.onmouseup = ()=>{
+					this.moving = false;
+					ctx.closePath();
+					// 通过getImageData()复制画布上指定矩形的像素数据
+					this.imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+					this.step++;
+					if(this.step < this.canvasHistory.length){
+						this.canvasHistory.length = this.step; // 截断数组
+					};
+					this.canvasHistory.push(canvas.toDataURL()); // 添加新的绘制到历史记录
+				};
+				
+				undo.onclick = ()=>{
+					if(this.step >= 0){
+						this.step--;
+						ctx.clearRect(0, 0, canvas.width, canvas.height);
+						var canvasPic = new Image();
+						canvasPic.crossOrigin = '';
+						canvasPic.src = this.canvasHistory[this.step];
+						canvasPic.addEventListener('load', () => {
+							ctx.drawImage(canvasPic, 0, 0);
+						});
+					}else{
+						alert('到底了！');
+					};
+					this.imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+				};
+
+				redo.onclick = ()=>{
+					if(this.step < this.canvasHistory.length - 1){
+						this.step++;
+						var canvasPic = new Image();
+						canvasPic.crossOrigin = '';
+						canvasPic.src = this.canvasHistory[this.step];
+						canvasPic.addEventListener('load', () => {
+							ctx.clearRect(0, 0, canvas.width, canvas.height);
+							ctx.drawImage(canvasPic, 0, 0);
+						});
+					}else{
+						alert('已经是最新的记录了！');
+					};
+					this.imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+				};
+			};
+			
+			// 公共方法
+			drawImg.prototype.common = function(){
+				if(palette.type !== 'pen'){
+					// 清除画布
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+					// 通过putImageData()重新写入像素数据
+					this.imgData && ctx.putImageData(this.imgData, 0, 0);
+				};
+
+				// 线的样式
+				ctx.lineWidth = palette.lineWidth;
+				ctx.strokeStyle = palette.color;
+				ctx.fillStyle = palette.color;
+				if(palette.type == 'pen'){
+					ctx.lineCap = 'round';
+					ctx.lineJoin = 'round';
+				}else{
+					ctx.lineCap = 'butt';
+					ctx.lineJoin = 'miter';
+				};
+			};
+			// 画笔
+			drawImg.prototype.pen = function(ev){
+				this.common();
+				ctx.lineTo(ev.offsetX, ev.offsetY);
+				ctx.stroke();
+			};
+			// 橡皮擦
+			drawImg.prototype.eraser = function(ev){
+				var r = palette.lineWidth / 2;
+				ctx.clearRect(ev.offsetX - r, ev.offsetY - r, 2 * r, 2 * r);
+			};
+			// 区域清除
+			drawImg.prototype.cleararea = function(ev){
+				var w = ev.offsetX-this.x;
+				var h = ev.offsetY-this.y;
+				ctx.clearRect(this.x, this.y, w, h);
+			};
+			// 画直线
+			drawImg.prototype.line = function(ev){
+				this.common();
+				ctx.beginPath();
+				ctx.moveTo(this.x, this.y);
+				ctx.lineTo(ev.offsetX, ev.offsetY);
+				ctx.stroke();
+			};
+			// 画矩形
+			drawImg.prototype.rect = function(ev){
+				this.common();
+				var w = ev.offsetX-this.x;
+				var h = ev.offsetY-this.y;
+				ctx.beginPath();
+				ctx.rect(this.x, this.y, w, h);
+				// 描边 路径
+				ctx[palette.strokeFill]();
+			};
+			// 画圆
+			drawImg.prototype.arc = function(ev){
+				this.common();
+				var r = Math.max(Math.abs(ev.offsetX-this.x),Math.abs(ev.offsetY-this.y));
+				ctx.beginPath();
+				ctx.arc(this.x, this.y, r, 0, 2*Math.PI);
+				ctx[palette.strokeFill]();
+			};
+
+			// 下载功能
+			canvasDown = function(ev){
+				var url = canvas.toDataURL('png');
+				var aDom = ev.nextElementSibling.firstElementChild;
+				aDom.setAttribute("href",url);
+				aDom.click();
+			};
+
+			// 实例化对象
+			var p1 = new drawImg();
+		</script>
+	</body>
+</html>
